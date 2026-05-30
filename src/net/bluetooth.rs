@@ -313,6 +313,7 @@ impl SocketAddrL2cap {
 }
 
 unsafe impl SocketAddrArg for SocketAddrL2cap {
+    #[allow(unused_unsafe)]
     unsafe fn with_sockaddr<R>(
         &self,
         f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R,
@@ -442,6 +443,7 @@ impl SocketAddrRfcomm {
 }
 
 unsafe impl SocketAddrArg for SocketAddrRfcomm {
+    #[allow(unused_unsafe)]
     unsafe fn with_sockaddr<R>(
         &self,
         f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R,

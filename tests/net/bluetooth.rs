@@ -5,6 +5,7 @@ use rustix::net::bluetooth::{
 };
 use rustix::net::{AddressFamily, RawProtocol, SocketAddrAny, SocketAddrV4, SocketType};
 
+#[allow(unused_unsafe)]
 unsafe fn sockaddr_bytes(addr: &SocketAddrAny) -> &[u8] {
     unsafe { core::slice::from_raw_parts(addr.as_ptr().cast(), addr.addr_len() as usize) }
 }
