@@ -145,6 +145,11 @@
 
 #[cfg(all(target_os = "linux", feature = "time"))]
 use crate::clockid::ClockId;
+#[cfg(all(linux_kernel, linux_raw_dep))]
+use crate::net::bluetooth::{
+    BluetoothChannelPolicy, BluetoothMode, BluetoothPhy, BluetoothPower, BluetoothSecurity,
+    BluetoothVoice, HciFilter, L2capConnInfo, L2capLinkMode, L2capOptions,
+};
 #[cfg(target_os = "linux")]
 use crate::net::xdp::{XdpMmapOffsets, XdpOptionsFlags, XdpStatistics, XdpUmemReg};
 #[cfg(not(any(
@@ -724,6 +729,262 @@ pub fn socket_incoming_cpu<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
 #[doc(alias = "SO_INCOMING_CPU")]
 pub fn set_socket_incoming_cpu<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
     backend::net::sockopt::set_socket_incoming_cpu(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, SOL_HCI, HCI_DATA_DIR)`
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "HCI_DATA_DIR")]
+pub fn hci_data_dir<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
+    backend::net::sockopt::hci_data_dir(fd.as_fd())
+}
+
+/// `setsockopt(fd, SOL_HCI, HCI_DATA_DIR, value)`
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "HCI_DATA_DIR")]
+pub fn set_hci_data_dir<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
+    backend::net::sockopt::set_hci_data_dir(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, SOL_HCI, HCI_TIME_STAMP)`
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "HCI_TIME_STAMP")]
+pub fn hci_time_stamp<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
+    backend::net::sockopt::hci_time_stamp(fd.as_fd())
+}
+
+/// `setsockopt(fd, SOL_HCI, HCI_TIME_STAMP, value)`
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "HCI_TIME_STAMP")]
+pub fn set_hci_time_stamp<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
+    backend::net::sockopt::set_hci_time_stamp(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, SOL_HCI, HCI_FILTER)`
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "HCI_FILTER")]
+pub fn hci_filter<Fd: AsFd>(fd: Fd) -> io::Result<HciFilter> {
+    backend::net::sockopt::hci_filter(fd.as_fd())
+}
+
+/// `setsockopt(fd, SOL_HCI, HCI_FILTER, value)`
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "HCI_FILTER")]
+pub fn set_hci_filter<Fd: AsFd>(fd: Fd, value: HciFilter) -> io::Result<()> {
+    backend::net::sockopt::set_hci_filter(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, SOL_BLUETOOTH, BT_SECURITY)`
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "BT_SECURITY")]
+pub fn bluetooth_security<Fd: AsFd>(fd: Fd) -> io::Result<BluetoothSecurity> {
+    backend::net::sockopt::bluetooth_security(fd.as_fd())
+}
+
+/// `setsockopt(fd, SOL_BLUETOOTH, BT_SECURITY, value)`
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "BT_SECURITY")]
+pub fn set_bluetooth_security<Fd: AsFd>(fd: Fd, value: BluetoothSecurity) -> io::Result<()> {
+    backend::net::sockopt::set_bluetooth_security(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, SOL_BLUETOOTH, BT_DEFER_SETUP)`
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "BT_DEFER_SETUP")]
+pub fn bluetooth_defer_setup<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
+    backend::net::sockopt::bluetooth_defer_setup(fd.as_fd())
+}
+
+/// `setsockopt(fd, SOL_BLUETOOTH, BT_DEFER_SETUP, value)`
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "BT_DEFER_SETUP")]
+pub fn set_bluetooth_defer_setup<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
+    backend::net::sockopt::set_bluetooth_defer_setup(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, SOL_BLUETOOTH, BT_FLUSHABLE)`
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "BT_FLUSHABLE")]
+pub fn bluetooth_flushable<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
+    backend::net::sockopt::bluetooth_flushable(fd.as_fd())
+}
+
+/// `setsockopt(fd, SOL_BLUETOOTH, BT_FLUSHABLE, value)`
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "BT_FLUSHABLE")]
+pub fn set_bluetooth_flushable<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
+    backend::net::sockopt::set_bluetooth_flushable(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, SOL_BLUETOOTH, BT_POWER)`
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "BT_POWER")]
+pub fn bluetooth_power<Fd: AsFd>(fd: Fd) -> io::Result<BluetoothPower> {
+    backend::net::sockopt::bluetooth_power(fd.as_fd())
+}
+
+/// `setsockopt(fd, SOL_BLUETOOTH, BT_POWER, value)`
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "BT_POWER")]
+pub fn set_bluetooth_power<Fd: AsFd>(fd: Fd, value: BluetoothPower) -> io::Result<()> {
+    backend::net::sockopt::set_bluetooth_power(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, SOL_BLUETOOTH, BT_CHANNEL_POLICY)`
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "BT_CHANNEL_POLICY")]
+pub fn bluetooth_channel_policy<Fd: AsFd>(fd: Fd) -> io::Result<BluetoothChannelPolicy> {
+    backend::net::sockopt::bluetooth_channel_policy(fd.as_fd())
+}
+
+/// `getsockopt(fd, SOL_BLUETOOTH, BT_VOICE)`
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "BT_VOICE")]
+pub fn bluetooth_voice<Fd: AsFd>(fd: Fd) -> io::Result<BluetoothVoice> {
+    backend::net::sockopt::bluetooth_voice(fd.as_fd())
+}
+
+/// `setsockopt(fd, SOL_BLUETOOTH, BT_VOICE, value)`
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "BT_VOICE")]
+pub fn set_bluetooth_voice<Fd: AsFd>(fd: Fd, value: BluetoothVoice) -> io::Result<()> {
+    backend::net::sockopt::set_bluetooth_voice(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, SOL_BLUETOOTH, BT_PHY)`
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "BT_PHY")]
+pub fn bluetooth_phy<Fd: AsFd>(fd: Fd) -> io::Result<BluetoothPhy> {
+    backend::net::sockopt::bluetooth_phy(fd.as_fd())
+}
+
+/// `setsockopt(fd, SOL_BLUETOOTH, BT_PHY, value)`
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "BT_PHY")]
+pub fn set_bluetooth_phy<Fd: AsFd>(fd: Fd, value: BluetoothPhy) -> io::Result<()> {
+    backend::net::sockopt::set_bluetooth_phy(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, SOL_BLUETOOTH, BT_MODE)`
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "BT_MODE")]
+pub fn bluetooth_mode<Fd: AsFd>(fd: Fd) -> io::Result<BluetoothMode> {
+    backend::net::sockopt::bluetooth_mode(fd.as_fd())
+}
+
+/// `setsockopt(fd, SOL_BLUETOOTH, BT_MODE, value)`
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "BT_MODE")]
+pub fn set_bluetooth_mode<Fd: AsFd>(fd: Fd, value: BluetoothMode) -> io::Result<()> {
+    backend::net::sockopt::set_bluetooth_mode(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, SOL_BLUETOOTH, BT_PKT_STATUS)`
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "BT_PKT_STATUS")]
+pub fn bluetooth_pkt_status<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
+    backend::net::sockopt::bluetooth_pkt_status(fd.as_fd())
+}
+
+/// `setsockopt(fd, SOL_BLUETOOTH, BT_PKT_STATUS, value)`
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "BT_PKT_STATUS")]
+pub fn set_bluetooth_pkt_status<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
+    backend::net::sockopt::set_bluetooth_pkt_status(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, SOL_BLUETOOTH, BT_SNDMTU)` for L2CAP sockets.
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "BT_SNDMTU")]
+pub fn l2cap_send_mtu<Fd: AsFd>(fd: Fd) -> io::Result<u16> {
+    backend::net::sockopt::l2cap_send_mtu(fd.as_fd())
+}
+
+/// `setsockopt(fd, SOL_BLUETOOTH, BT_SNDMTU, value)` for L2CAP sockets.
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "BT_SNDMTU")]
+pub fn set_l2cap_send_mtu<Fd: AsFd>(fd: Fd, value: u16) -> io::Result<()> {
+    backend::net::sockopt::set_l2cap_send_mtu(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, SOL_BLUETOOTH, BT_RCVMTU)` for L2CAP sockets.
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "BT_RCVMTU")]
+pub fn l2cap_recv_mtu<Fd: AsFd>(fd: Fd) -> io::Result<u16> {
+    backend::net::sockopt::l2cap_recv_mtu(fd.as_fd())
+}
+
+/// `setsockopt(fd, SOL_BLUETOOTH, BT_RCVMTU, value)` for L2CAP sockets.
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "BT_RCVMTU")]
+pub fn set_l2cap_recv_mtu<Fd: AsFd>(fd: Fd, value: u16) -> io::Result<()> {
+    backend::net::sockopt::set_l2cap_recv_mtu(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, SOL_L2CAP, L2CAP_OPTIONS)`
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "L2CAP_OPTIONS")]
+pub fn l2cap_options<Fd: AsFd>(fd: Fd) -> io::Result<L2capOptions> {
+    backend::net::sockopt::l2cap_options(fd.as_fd())
+}
+
+/// `setsockopt(fd, SOL_L2CAP, L2CAP_OPTIONS, value)`
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "L2CAP_OPTIONS")]
+pub fn set_l2cap_options<Fd: AsFd>(fd: Fd, value: L2capOptions) -> io::Result<()> {
+    backend::net::sockopt::set_l2cap_options(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, SOL_L2CAP, L2CAP_CONNINFO)`
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "L2CAP_CONNINFO")]
+pub fn l2cap_conninfo<Fd: AsFd>(fd: Fd) -> io::Result<L2capConnInfo> {
+    backend::net::sockopt::l2cap_conninfo(fd.as_fd())
+}
+
+/// `getsockopt(fd, SOL_L2CAP, L2CAP_LM)`
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "L2CAP_LM")]
+pub fn l2cap_lm<Fd: AsFd>(fd: Fd) -> io::Result<L2capLinkMode> {
+    backend::net::sockopt::l2cap_lm(fd.as_fd())
+}
+
+/// `setsockopt(fd, SOL_L2CAP, L2CAP_LM, value)`
+#[cfg(all(linux_kernel, linux_raw_dep))]
+#[inline]
+#[doc(alias = "L2CAP_LM")]
+pub fn set_l2cap_lm<Fd: AsFd>(fd: Fd, value: L2capLinkMode) -> io::Result<()> {
+    backend::net::sockopt::set_l2cap_lm(fd.as_fd(), value)
 }
 
 /// `setsockopt(fd, IPPROTO_IP, IP_TTL, value)`
