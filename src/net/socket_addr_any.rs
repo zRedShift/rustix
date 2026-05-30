@@ -6,6 +6,8 @@ use crate::backend::c;
 use crate::backend::net::read_sockaddr;
 use crate::io::Errno;
 use crate::net::addr::{SocketAddrArg, SocketAddrLen, SocketAddrOpaque, SocketAddrStorage};
+#[cfg(all(linux_kernel, linux_raw_dep))]
+use crate::net::bluetooth::{SocketAddrHci, SocketAddrL2cap, SocketAddrSco};
 #[cfg(unix)]
 use crate::net::SocketAddrUnix;
 use crate::net::{AddressFamily, SocketAddr, SocketAddrV4, SocketAddrV6};
@@ -222,6 +224,18 @@ impl fmt::Debug for SocketAddrAny {
             #[cfg(linux_kernel)]
             AddressFamily::NETLINK => {
                 if let Ok(addr) = crate::net::netlink::SocketAddrNetlink::try_from(self.clone()) {
+                    return addr.fmt(f);
+                }
+            }
+            #[cfg(all(linux_kernel, linux_raw_dep))]
+            AddressFamily::BLUETOOTH => {
+                if let Ok(addr) = SocketAddrHci::try_from(self.clone()) {
+                    return addr.fmt(f);
+                }
+                if let Ok(addr) = SocketAddrL2cap::try_from(self.clone()) {
+                    return addr.fmt(f);
+                }
+                if let Ok(addr) = SocketAddrSco::try_from(self.clone()) {
                     return addr.fmt(f);
                 }
             }

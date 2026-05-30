@@ -13,6 +13,10 @@ use crate::fd::BorrowedFd;
 #[cfg(feature = "alloc")]
 use crate::ffi::CStr;
 use crate::io;
+use crate::net::bluetooth::{
+    BluetoothChannelPolicy, BluetoothMode, BluetoothPhy, BluetoothPower, BluetoothSecurity,
+    BluetoothVoice, HciFilter, L2capConnInfo, L2capLinkMode, L2capOptions,
+};
 use crate::net::sockopt::{Ipv4PathMtuDiscovery, Ipv6PathMtuDiscovery, Timeout};
 #[cfg(target_os = "linux")]
 use crate::net::xdp::{XdpMmapOffsets, XdpOptionsFlags, XdpRingOffset, XdpStatistics, XdpUmemReg};
@@ -44,10 +48,6 @@ use {
 #[inline]
 fn getsockopt<T: Copy>(fd: BorrowedFd<'_>, level: u32, optname: u32) -> io::Result<T> {
     let mut optlen: c::socklen_t = size_of::<T>().try_into().unwrap();
-    debug_assert!(
-        optlen as usize >= size_of::<c::c_int>(),
-        "Socket APIs don't ever use `bool` directly"
-    );
 
     let mut value = MaybeUninit::<T>::uninit();
     getsockopt_raw(fd, level, optname, &mut value, &mut optlen)?;
@@ -99,10 +99,6 @@ fn getsockopt_raw<T>(
 #[inline]
 fn setsockopt<T: Copy>(fd: BorrowedFd<'_>, level: u32, optname: u32, value: T) -> io::Result<()> {
     let optlen = size_of::<T>().try_into().unwrap();
-    debug_assert!(
-        optlen as usize >= size_of::<c::c_int>(),
-        "Socket APIs don't ever use `bool` directly"
-    );
     setsockopt_raw(fd, level, optname, &value, optlen)
 }
 
@@ -436,6 +432,193 @@ pub(crate) fn socket_incoming_cpu(fd: BorrowedFd<'_>) -> io::Result<u32> {
 #[inline]
 pub(crate) fn set_socket_incoming_cpu(fd: BorrowedFd<'_>, value: u32) -> io::Result<()> {
     setsockopt(fd, c::SOL_SOCKET, c::SO_INCOMING_CPU, value)
+}
+
+#[inline]
+pub(crate) fn hci_data_dir(fd: BorrowedFd<'_>) -> io::Result<bool> {
+    getsockopt(fd, c::SOL_HCI, c::HCI_DATA_DIR).map(|value: u8| value != 0)
+}
+
+#[inline]
+pub(crate) fn set_hci_data_dir(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
+    setsockopt(fd, c::SOL_HCI, c::HCI_DATA_DIR, from_bool(value))
+}
+
+#[inline]
+pub(crate) fn hci_time_stamp(fd: BorrowedFd<'_>) -> io::Result<bool> {
+    getsockopt(fd, c::SOL_HCI, c::HCI_TIME_STAMP).map(|value: u8| value != 0)
+}
+
+#[inline]
+pub(crate) fn set_hci_time_stamp(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
+    setsockopt(fd, c::SOL_HCI, c::HCI_TIME_STAMP, from_bool(value))
+}
+
+#[inline]
+pub(crate) fn hci_filter(fd: BorrowedFd<'_>) -> io::Result<HciFilter> {
+    getsockopt(fd, c::SOL_HCI, c::HCI_FILTER).map(HciFilter::from_raw)
+}
+
+#[inline]
+pub(crate) fn set_hci_filter(fd: BorrowedFd<'_>, value: HciFilter) -> io::Result<()> {
+    let raw = value.to_raw();
+    setsockopt_raw(
+        fd,
+        c::SOL_HCI,
+        c::HCI_FILTER,
+        raw.as_ptr(),
+        size_of::<c::hci_ufilter>().try_into().unwrap(),
+    )
+}
+
+#[inline]
+pub(crate) fn bluetooth_security(fd: BorrowedFd<'_>) -> io::Result<BluetoothSecurity> {
+    getsockopt(fd, c::SOL_BLUETOOTH, c::BT_SECURITY)
+}
+
+#[inline]
+pub(crate) fn set_bluetooth_security(
+    fd: BorrowedFd<'_>,
+    value: BluetoothSecurity,
+) -> io::Result<()> {
+    setsockopt(fd, c::SOL_BLUETOOTH, c::BT_SECURITY, value)
+}
+
+#[inline]
+pub(crate) fn bluetooth_defer_setup(fd: BorrowedFd<'_>) -> io::Result<bool> {
+    getsockopt(fd, c::SOL_BLUETOOTH, c::BT_DEFER_SETUP).map(to_bool)
+}
+
+#[inline]
+pub(crate) fn set_bluetooth_defer_setup(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
+    setsockopt(fd, c::SOL_BLUETOOTH, c::BT_DEFER_SETUP, from_bool(value))
+}
+
+#[inline]
+pub(crate) fn bluetooth_flushable(fd: BorrowedFd<'_>) -> io::Result<bool> {
+    getsockopt(fd, c::SOL_BLUETOOTH, c::BT_FLUSHABLE).map(to_bool)
+}
+
+#[inline]
+pub(crate) fn set_bluetooth_flushable(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
+    setsockopt(fd, c::SOL_BLUETOOTH, c::BT_FLUSHABLE, from_bool(value))
+}
+
+#[inline]
+pub(crate) fn bluetooth_power(fd: BorrowedFd<'_>) -> io::Result<BluetoothPower> {
+    getsockopt(fd, c::SOL_BLUETOOTH, c::BT_POWER)
+}
+
+#[inline]
+pub(crate) fn set_bluetooth_power(fd: BorrowedFd<'_>, value: BluetoothPower) -> io::Result<()> {
+    setsockopt(fd, c::SOL_BLUETOOTH, c::BT_POWER, value)
+}
+
+#[inline]
+pub(crate) fn bluetooth_channel_policy(fd: BorrowedFd<'_>) -> io::Result<BluetoothChannelPolicy> {
+    getsockopt(fd, c::SOL_BLUETOOTH, c::BT_CHANNEL_POLICY)
+}
+
+#[inline]
+pub(crate) fn bluetooth_voice(fd: BorrowedFd<'_>) -> io::Result<BluetoothVoice> {
+    getsockopt(fd, c::SOL_BLUETOOTH, c::BT_VOICE)
+}
+
+#[inline]
+pub(crate) fn set_bluetooth_voice(fd: BorrowedFd<'_>, value: BluetoothVoice) -> io::Result<()> {
+    setsockopt(fd, c::SOL_BLUETOOTH, c::BT_VOICE, value)
+}
+
+#[inline]
+pub(crate) fn bluetooth_phy(fd: BorrowedFd<'_>) -> io::Result<BluetoothPhy> {
+    getsockopt(fd, c::SOL_BLUETOOTH, c::BT_PHY)
+}
+
+#[inline]
+pub(crate) fn set_bluetooth_phy(fd: BorrowedFd<'_>, value: BluetoothPhy) -> io::Result<()> {
+    setsockopt(fd, c::SOL_BLUETOOTH, c::BT_PHY, value)
+}
+
+#[inline]
+pub(crate) fn bluetooth_mode(fd: BorrowedFd<'_>) -> io::Result<BluetoothMode> {
+    getsockopt(fd, c::SOL_BLUETOOTH, c::BT_MODE)
+}
+
+#[inline]
+pub(crate) fn set_bluetooth_mode(fd: BorrowedFd<'_>, value: BluetoothMode) -> io::Result<()> {
+    setsockopt(fd, c::SOL_BLUETOOTH, c::BT_MODE, value)
+}
+
+#[inline]
+pub(crate) fn bluetooth_pkt_status(fd: BorrowedFd<'_>) -> io::Result<bool> {
+    getsockopt(fd, c::SOL_BLUETOOTH, c::BT_PKT_STATUS).map(to_bool)
+}
+
+#[inline]
+pub(crate) fn set_bluetooth_pkt_status(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
+    setsockopt(fd, c::SOL_BLUETOOTH, c::BT_PKT_STATUS, from_bool(value))
+}
+
+#[inline]
+fn l2cap_mtu(fd: BorrowedFd<'_>, optname: u32) -> io::Result<u16> {
+    let mut optlen: c::socklen_t = size_of::<[u8; 4]>().try_into().unwrap();
+    let mut value = MaybeUninit::<[u8; 4]>::zeroed();
+    getsockopt_raw(fd, c::SOL_BLUETOOTH, optname, &mut value, &mut optlen)?;
+    let bytes = unsafe { value.assume_init() };
+
+    Ok(u16::from_ne_bytes([bytes[0], bytes[1]]))
+}
+
+#[inline]
+pub(crate) fn l2cap_send_mtu(fd: BorrowedFd<'_>) -> io::Result<u16> {
+    l2cap_mtu(fd, c::BT_SNDMTU)
+}
+
+#[inline]
+pub(crate) fn set_l2cap_send_mtu(fd: BorrowedFd<'_>, value: u16) -> io::Result<()> {
+    setsockopt(fd, c::SOL_BLUETOOTH, c::BT_SNDMTU, value)
+}
+
+#[inline]
+pub(crate) fn l2cap_recv_mtu(fd: BorrowedFd<'_>) -> io::Result<u16> {
+    l2cap_mtu(fd, c::BT_RCVMTU)
+}
+
+#[inline]
+pub(crate) fn set_l2cap_recv_mtu(fd: BorrowedFd<'_>, value: u16) -> io::Result<()> {
+    setsockopt(fd, c::SOL_BLUETOOTH, c::BT_RCVMTU, value)
+}
+
+#[inline]
+pub(crate) fn l2cap_options(fd: BorrowedFd<'_>) -> io::Result<L2capOptions> {
+    getsockopt(fd, c::SOL_L2CAP, c::L2CAP_OPTIONS).map(L2capOptions::from_raw)
+}
+
+#[inline]
+pub(crate) fn set_l2cap_options(fd: BorrowedFd<'_>, value: L2capOptions) -> io::Result<()> {
+    let raw = value.to_raw();
+    setsockopt_raw(
+        fd,
+        c::SOL_L2CAP,
+        c::L2CAP_OPTIONS,
+        raw.as_ptr(),
+        size_of::<c::l2cap_options>().try_into().unwrap(),
+    )
+}
+
+#[inline]
+pub(crate) fn l2cap_conninfo(fd: BorrowedFd<'_>) -> io::Result<L2capConnInfo> {
+    getsockopt(fd, c::SOL_L2CAP, c::L2CAP_CONNINFO)
+}
+
+#[inline]
+pub(crate) fn l2cap_lm(fd: BorrowedFd<'_>) -> io::Result<L2capLinkMode> {
+    getsockopt(fd, c::SOL_L2CAP, c::L2CAP_LM)
+}
+
+#[inline]
+pub(crate) fn set_l2cap_lm(fd: BorrowedFd<'_>, value: L2capLinkMode) -> io::Result<()> {
+    setsockopt(fd, c::SOL_L2CAP, c::L2CAP_LM, value)
 }
 
 #[inline]

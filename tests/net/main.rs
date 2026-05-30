@@ -6,6 +6,8 @@
 #![cfg_attr(core_c_str, feature(core_c_str))]
 
 mod addr;
+#[cfg(all(linux_kernel, linux_raw_dep))]
+mod bluetooth;
 #[cfg(all(unix, not(target_os = "redox")))]
 mod cmsg;
 mod connect_bind_send;
