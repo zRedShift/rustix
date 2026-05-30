@@ -256,6 +256,7 @@ check-cfg = [
     'cfg(error_in_core)',
     'cfg(fix_y2038)',
     'cfg(freebsdlike)',
+    'cfg(ip)',
     'cfg(libc)',
     'cfg(linux_kernel)',
     'cfg(linux_like)',

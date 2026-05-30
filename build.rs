@@ -62,10 +62,15 @@ fn main() {
     // If experimental features are enabled, auto-detect and use available
     // features.
     if rustc_dep_of_std {
-        use_feature("rustc_attrs");
+        if has_rustc_attrs() {
+            use_feature("rustc_attrs");
+        }
         use_feature("core_intrinsics");
+        use_feature_if_no_warnings("ip");
     } else if rustix_use_experimental_features {
-        use_feature_or_nothing("rustc_attrs");
+        if has_rustc_attrs() {
+            use_feature("rustc_attrs");
+        }
         use_feature_or_nothing("core_intrinsics");
     }
 
@@ -203,8 +208,26 @@ fn has_lower_upper_exp_for_non_zero() -> bool {
     can_compile("fn a(x: &core::num::NonZeroI32, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result { core::fmt::LowerExp::fmt(x, f) }")
 }
 
+fn has_rustc_attrs() -> bool {
+    can_compile(
+        "#![feature(rustc_attrs)]
+         #![allow(internal_features)]
+         #![allow(dead_code)]
+         #[rustc_layout_scalar_valid_range_start(1)]
+         #[rustc_layout_scalar_valid_range_end(10)]
+         #[rustc_nonnull_optimization_guaranteed]
+         pub struct Foo(u32);",
+    )
+}
+
 fn use_feature_or_nothing(feature: &str) {
     if has_feature(feature) {
+        use_feature(feature);
+    }
+}
+
+fn use_feature_if_no_warnings(feature: &str) {
+    if has_feature_without_warnings(feature) {
         use_feature(feature);
     }
 }
@@ -217,6 +240,15 @@ fn use_feature(feature: &str) {
 fn has_feature(feature: &str) -> bool {
     can_compile(format!(
         "#![allow(stable_features)]\n#![feature({})]",
+        feature
+    ))
+}
+
+/// Test whether the rustc at `var("RUSTC")` supports the given feature without
+/// warnings.
+fn has_feature_without_warnings(feature: &str) -> bool {
+    can_compile(format!(
+        "#![deny(warnings)]\n#![allow(stable_features)]\n#![feature({})]",
         feature
     ))
 }

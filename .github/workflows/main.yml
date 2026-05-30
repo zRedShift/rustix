@@ -617,7 +617,7 @@ jobs:
         cargo update --package=futures-task --precise=0.3.31
 
     - run: |
-        cargo test --verbose --features=all-apis --release --workspace -- --nocapture
+        cargo test --config 'patch.crates-io.rustix.path="."' --verbose --features=all-apis --release --workspace -- --nocapture
       env:
         RUST_BACKTRACE: full
         MACOSX_DEPLOYMENT_TARGET: 10.7
