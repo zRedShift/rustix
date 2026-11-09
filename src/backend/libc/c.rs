@@ -63,8 +63,33 @@ pub(crate) const ETH_P_XDSA: c_int = linux_raw_sys::if_ether::ETH_P_XDSA as _;
 pub(crate) const ETH_P_MAP: c_int = linux_raw_sys::if_ether::ETH_P_MAP as _;
 #[cfg(all(linux_raw_dep, feature = "net"))]
 pub(crate) const ETH_P_MCTP: c_int = linux_raw_sys::if_ether::ETH_P_MCTP as _;
+#[cfg(all(linux_raw_dep, feature = "net", linux_kernel))]
+pub(crate) const SOL_BLUETOOTH: c_int = linux_raw_sys::net::SOL_BLUETOOTH as _;
 #[cfg(all(linux_raw_dep, feature = "mount"))]
 pub(crate) const MS_NOSYMFOLLOW: c_ulong = linux_raw_sys::general::MS_NOSYMFOLLOW as _;
+
+#[cfg(all(linux_raw_dep, feature = "net", linux_kernel))]
+pub(crate) use linux_raw_sys::bluetooth::{
+    bdaddr_t, bt_power, bt_security, bt_voice, hci_ufilter, l2cap_conninfo, l2cap_options,
+    sockaddr_hci, sockaddr_l2, sockaddr_rc, sockaddr_sco, BDADDR_BREDR, BDADDR_LE_PUBLIC,
+    BDADDR_LE_RANDOM, BTPROTO_AVDTP, BTPROTO_BNEP, BTPROTO_CMTP, BTPROTO_HCI, BTPROTO_HIDP,
+    BTPROTO_L2CAP, BTPROTO_RFCOMM, BTPROTO_SCO, BT_CHANNEL_POLICY, BT_CHANNEL_POLICY_AMP_PREFERRED,
+    BT_CHANNEL_POLICY_BREDR_ONLY, BT_CHANNEL_POLICY_BREDR_PREFERRED, BT_DEFER_SETUP, BT_FLUSHABLE,
+    BT_MODE, BT_MODE_BASIC, BT_MODE_ERTM, BT_MODE_EXT_FLOWCTL, BT_MODE_LE_FLOWCTL,
+    BT_MODE_STREAMING, BT_PHY, BT_PHY_BR_1M_1SLOT, BT_PHY_BR_1M_3SLOT, BT_PHY_BR_1M_5SLOT,
+    BT_PHY_EDR_2M_1SLOT, BT_PHY_EDR_2M_3SLOT, BT_PHY_EDR_2M_5SLOT, BT_PHY_EDR_3M_1SLOT,
+    BT_PHY_EDR_3M_3SLOT, BT_PHY_EDR_3M_5SLOT, BT_PHY_LE_1M_RX, BT_PHY_LE_1M_TX, BT_PHY_LE_2M_RX,
+    BT_PHY_LE_2M_TX, BT_PHY_LE_CODED_RX, BT_PHY_LE_CODED_TX, BT_PKT_STATUS, BT_POWER,
+    BT_POWER_FORCE_ACTIVE_OFF, BT_POWER_FORCE_ACTIVE_ON, BT_RCVMTU, BT_SECURITY, BT_SECURITY_FIPS,
+    BT_SECURITY_HIGH, BT_SECURITY_LOW, BT_SECURITY_MEDIUM, BT_SECURITY_SDP, BT_SNDMTU, BT_VOICE,
+    BT_VOICE_CVSD_16BIT, BT_VOICE_TRANSPARENT, BT_VOICE_TRANSPARENT_16BIT, HCI_CHANNEL_CONTROL,
+    HCI_CHANNEL_LOGGING, HCI_CHANNEL_MONITOR, HCI_CHANNEL_RAW, HCI_CHANNEL_USER, HCI_DATA_DIR,
+    HCI_DEV_NONE, HCI_FILTER, HCI_TIME_STAMP, L2CAP_CONNINFO, L2CAP_LM, L2CAP_LM_AUTH,
+    L2CAP_LM_ENCRYPT, L2CAP_LM_FIPS, L2CAP_LM_MASTER, L2CAP_LM_RELIABLE, L2CAP_LM_SECURE,
+    L2CAP_LM_TRUSTED, L2CAP_MODE_BASIC, L2CAP_MODE_ERTM, L2CAP_MODE_EXT_FLOWCTL,
+    L2CAP_MODE_FLOWCTL, L2CAP_MODE_LE_FLOWCTL, L2CAP_MODE_RETRANS, L2CAP_MODE_STREAMING,
+    L2CAP_OPTIONS, SOL_HCI, SOL_L2CAP,
+};
 
 // TODO: Upstream these.
 #[cfg(all(linux_raw_dep, feature = "termios"))]

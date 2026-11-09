@@ -5,6 +5,8 @@
 use crate::backend::c;
 use crate::io::Errno;
 use crate::net::addr::SocketAddrLen;
+use crate::net::bluetooth::{BdAddr, BdAddrType, HciChannel, HciDevice};
+use crate::net::bluetooth::{SocketAddrHci, SocketAddrL2cap, SocketAddrRfcomm, SocketAddrSco};
 use crate::net::netlink::SocketAddrNetlink;
 #[cfg(target_os = "linux")]
 use crate::net::xdp::{SocketAddrXdp, SocketAddrXdpFlags};
@@ -152,4 +154,54 @@ pub(crate) fn read_sockaddr_netlink(addr: &SocketAddrAny) -> Result<SocketAddrNe
     assert!(addr.addr_len() as usize >= size_of::<c::sockaddr_nl>());
     let decode = unsafe { &*addr.as_ptr().cast::<c::sockaddr_nl>() };
     Ok(SocketAddrNetlink::new(decode.nl_pid, decode.nl_groups))
+}
+
+#[inline]
+fn require_bluetooth_len<T>(addr: &SocketAddrAny) -> Result<(), Errno> {
+    if addr.address_family() != AddressFamily::BLUETOOTH {
+        return Err(Errno::AFNOSUPPORT);
+    }
+    if addr.addr_len() as usize != size_of::<T>() {
+        return Err(Errno::INVAL);
+    }
+    Ok(())
+}
+
+#[inline]
+pub(crate) fn read_sockaddr_hci(addr: &SocketAddrAny) -> Result<SocketAddrHci, Errno> {
+    require_bluetooth_len::<c::sockaddr_hci>(addr)?;
+    let decode = unsafe { &*addr.as_ptr().cast::<c::sockaddr_hci>() };
+    Ok(SocketAddrHci::new(
+        HciDevice::from_raw(decode.hci_dev),
+        HciChannel::from_raw(decode.hci_channel),
+    ))
+}
+
+#[inline]
+pub(crate) fn read_sockaddr_l2cap(addr: &SocketAddrAny) -> Result<SocketAddrL2cap, Errno> {
+    require_bluetooth_len::<c::sockaddr_l2>(addr)?;
+    let decode = unsafe { &*addr.as_ptr().cast::<c::sockaddr_l2>() };
+    Ok(SocketAddrL2cap::new(
+        BdAddr::from(decode.l2_bdaddr),
+        BdAddrType::from_raw(decode.l2_bdaddr_type),
+        u16::from_le(decode.l2_psm),
+        u16::from_le(decode.l2_cid),
+    ))
+}
+
+#[inline]
+pub(crate) fn read_sockaddr_sco(addr: &SocketAddrAny) -> Result<SocketAddrSco, Errno> {
+    require_bluetooth_len::<c::sockaddr_sco>(addr)?;
+    let decode = unsafe { &*addr.as_ptr().cast::<c::sockaddr_sco>() };
+    Ok(SocketAddrSco::new(BdAddr::from(decode.sco_bdaddr)))
+}
+
+#[inline]
+pub(crate) fn read_sockaddr_rfcomm(addr: &SocketAddrAny) -> Result<SocketAddrRfcomm, Errno> {
+    require_bluetooth_len::<c::sockaddr_rc>(addr)?;
+    let decode = unsafe { &*addr.as_ptr().cast::<c::sockaddr_rc>() };
+    Ok(SocketAddrRfcomm::new(
+        BdAddr::from(decode.rc_bdaddr),
+        decode.rc_channel,
+    ))
 }

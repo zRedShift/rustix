@@ -8,6 +8,8 @@
 //! [`wsa_cleanup`]: https://docs.rs/rustix/*/x86_64-pc-windows-msvc/rustix/net/fn.wsa_cleanup.html
 
 pub mod addr;
+#[cfg(all(linux_kernel, linux_raw_dep))]
+pub mod bluetooth;
 mod send_recv;
 mod socket;
 mod socket_addr_any;
